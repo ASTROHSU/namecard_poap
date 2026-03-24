@@ -1,0 +1,64 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function LoginPage() {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const res = await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin }),
+    });
+
+    if (res.ok) {
+      router.push("/");
+    } else {
+      setError("PIN 碼錯誤");
+      setPin("");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">POAP 名片</h1>
+          <p className="text-gray-500 mt-1">請輸入 PIN 碼</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="password"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            placeholder="PIN"
+            className="w-full px-4 py-3 text-center text-2xl tracking-widest border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+            autoFocus
+          />
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
+          <button
+            type="submit"
+            disabled={loading || !pin}
+            className="w-full py-3 bg-gray-900 text-white rounded-xl font-medium disabled:opacity-50 active:scale-[0.98] transition-transform"
+          >
+            {loading ? "驗證中..." : "進入"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
