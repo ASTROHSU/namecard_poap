@@ -14,6 +14,8 @@ export default function ScanPage() {
   const [imageData, setImageData] = useState<{ base64: string; mediaType: string } | null>(null);
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [error, setError] = useState("");
+  const [didSaveOnly, setDidSaveOnly] = useState(false);
+  const [warnings, setWarnings] = useState<string[]>([]);
 
   async function handleCapture(base64: string, mediaType: string) {
     setImageData({ base64, mediaType });
@@ -40,6 +42,7 @@ export default function ScanPage() {
 
   async function handleSend(saveOnly: boolean = false) {
     if (!cardData || !imageData) return;
+    setDidSaveOnly(saveOnly);
     setStep("sending");
 
     try {
@@ -55,6 +58,8 @@ export default function ScanPage() {
       });
 
       if (!res.ok) throw new Error("Send failed");
+      const data = await res.json();
+      setWarnings(data.warnings || []);
       setStep("done");
     } catch {
       setError("送出失敗，請重試");
@@ -127,14 +132,27 @@ export default function ScanPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="font-semibold text-gray-900">送出成功！</p>
-            <p className="text-sm text-gray-500">名片已存檔，Email 已發送</p>
+            <p className="font-semibold text-gray-900">
+              {didSaveOnly ? "存檔成功！" : "送出成功！"}
+            </p>
+            <p className="text-sm text-gray-500">
+              {didSaveOnly ? "名片已存檔" : "名片已存檔，Email 已發送"}
+            </p>
+            {warnings.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm text-amber-800 text-left">
+                {warnings.map((w, i) => (
+                  <p key={i}>{w}</p>
+                ))}
+              </div>
+            )}
             <div className="flex gap-3 justify-center pt-2">
               <button
                 onClick={() => {
                   setStep("capture");
                   setCardData(null);
                   setImageData(null);
+                  setDidSaveOnly(false);
+                  setWarnings([]);
                 }}
                 className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium active:scale-95 transition-transform"
               >

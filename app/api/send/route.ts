@@ -19,14 +19,18 @@ export async function POST(request: Request) {
     // Upload card image to Vercel Blob
     let cardImageUrl: string | null = null;
     if (image) {
-      const buffer = Buffer.from(image, "base64");
-      const ext = mediaType === "image/png" ? "png" : "jpg";
-      const filename = `cards/${Date.now()}.${ext}`;
-      const blob = await put(filename, buffer, {
-        access: "public",
-        contentType: mediaType || "image/jpeg",
-      });
-      cardImageUrl = blob.url;
+      try {
+        const buffer = Buffer.from(image, "base64");
+        const ext = mediaType === "image/png" ? "png" : "jpg";
+        const filename = `cards/${Date.now()}.${ext}`;
+        const blob = await put(filename, buffer, {
+          access: "public",
+          contentType: mediaType || "image/jpeg",
+        });
+        cardImageUrl = blob.url;
+      } catch (blobError) {
+        console.error("Blob upload error (continuing without image):", blobError);
+      }
     }
 
     // Save contact to database
@@ -46,10 +50,24 @@ export async function POST(request: Request) {
     `;
     const contactId = rows[0].id as string;
 
+    const result: {
+      id: string;
+      success: true;
+      emailSent?: boolean;
+      poapAssigned?: boolean;
+      warnings?: string[];
+    } = { id: contactId, success: true };
+    const warnings: string[] = [];
+
     if (!saveOnly && email) {
       // Assign POAP code
       const poapCode = await assignPoapCode(contactId);
       const poapClaimUrl = poapCode ? getPoapClaimUrl(poapCode) : null;
+      result.poapAssigned = !!poapCode;
+
+      if (!poapCode) {
+        warnings.push("POAP codes 已用完，Email 將不含 POAP 連結");
+      }
 
       // Update contact with POAP code
       if (poapCode) {
@@ -59,23 +77,34 @@ export async function POST(request: Request) {
       }
 
       // Send email
-      const recipientName = name_zh || name_en || "你好";
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://card.blocktrend.today";
+      try {
+        const recipientName = name_zh || name_en || "你好";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://card.blocktrend.today";
 
-      await sendCardEmail({
-        to: email,
-        recipientName,
-        poapClaimUrl,
-        landingPageUrl: `${appUrl}/card`,
-      });
+        await sendCardEmail({
+          to: email,
+          recipientName,
+          poapClaimUrl,
+          landingPageUrl: `${appUrl}/card`,
+        });
 
-      // Mark email as sent
-      await sql`
-        UPDATE contacts SET email_sent = ${true} WHERE id = ${contactId}::uuid
-      `;
+        // Mark email as sent
+        await sql`
+          UPDATE contacts SET email_sent = ${true} WHERE id = ${contactId}::uuid
+        `;
+        result.emailSent = true;
+      } catch (emailError) {
+        console.error("Email send error:", emailError);
+        warnings.push("Email 發送失敗，聯絡人已存檔但信件未寄出");
+        result.emailSent = false;
+      }
     }
 
-    return NextResponse.json({ id: contactId, success: true });
+    if (warnings.length > 0) {
+      result.warnings = warnings;
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Send error:", error);
     return NextResponse.json(
