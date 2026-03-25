@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n";
 
 interface Contact {
   id: string;
@@ -17,6 +18,7 @@ interface Contact {
 }
 
 export default function ContactsPage() {
+  const { t } = useI18n();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -44,9 +46,9 @@ export default function ContactsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
-        <h1 className="text-lg font-semibold">聯絡人</h1>
+        <h1 className="text-lg font-semibold">{t("contacts.title")}</h1>
         <span className="ml-auto text-sm text-gray-400">
-          {!loading && `${contacts.length} 筆`}
+          {!loading && `${contacts.length} ${t("contacts.count")}`}
         </span>
       </header>
 
@@ -55,7 +57,7 @@ export default function ContactsPage() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="搜尋姓名、公司、Email..."
+          placeholder={t("contacts.search")}
           className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
         />
 
@@ -69,7 +71,7 @@ export default function ContactsPage() {
             ))
           ) : contacts.length === 0 ? (
             <div className="bg-white rounded-xl p-8 text-center text-gray-400">
-              {search ? "找不到符合的聯絡人" : "尚無聯絡人"}
+              {search ? t("contacts.notFound") : t("contacts.none")}
             </div>
           ) : (
             contacts.map((c) => (
@@ -81,7 +83,7 @@ export default function ContactsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-medium text-gray-900">
-                      {c.name_zh || c.name_en || "未知"}
+                      {c.name_zh || c.name_en || t("home.unknown")}
                     </p>
                     <p className="text-sm text-gray-500 mt-0.5">
                       {[c.company_zh || c.company_en, c.title_zh].filter(Boolean).join(" · ") || c.email}
@@ -90,7 +92,7 @@ export default function ContactsPage() {
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     {c.email_sent && (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                        已寄
+                        {t("home.sent")}
                       </span>
                     )}
                     {c.poap_code && (

@@ -1,6 +1,7 @@
 "use client";
 
 import type { CardData } from "@/lib/claude";
+import { useI18n } from "@/lib/i18n";
 
 interface ContactFormProps {
   data: CardData;
@@ -14,6 +15,7 @@ function Field({
   onChange,
   type = "text",
   highlight = false,
+  highlightPlaceholder = "",
 }: {
   label: string;
   value: string | null;
@@ -21,6 +23,7 @@ function Field({
   onChange: (field: string, value: string) => void;
   type?: string;
   highlight?: boolean;
+  highlightPlaceholder?: string;
 }) {
   return (
     <div>
@@ -36,13 +39,15 @@ function Field({
             ? "border-amber-400 bg-amber-50"
             : "border-gray-200"
         }`}
-        placeholder={highlight && !value ? "請手動輸入" : ""}
+        placeholder={highlight && !value ? highlightPlaceholder : ""}
       />
     </div>
   );
 }
 
 export default function ContactForm({ data, onChange }: ContactFormProps) {
+  const { t } = useI18n();
+
   function handleChange(field: string, value: string) {
     if (field.startsWith("social.")) {
       const socialField = field.split(".")[1];
@@ -59,56 +64,57 @@ export default function ContactForm({ data, onChange }: ContactFormProps) {
     <div className="space-y-3">
       {!data.email && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm text-amber-800">
-          ⚠ 未偵測到 Email，請手動輸入
+          {t("form.noEmail")}
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="中文姓名" value={data.name_zh} field="name_zh" onChange={handleChange} />
-        <Field label="英文姓名" value={data.name_en} field="name_en" onChange={handleChange} />
+        <Field label={t("form.nameZh")} value={data.name_zh} field="name_zh" onChange={handleChange} />
+        <Field label={t("form.nameEn")} value={data.name_en} field="name_en" onChange={handleChange} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="中文公司" value={data.company_zh} field="company_zh" onChange={handleChange} />
-        <Field label="英文公司" value={data.company_en} field="company_en" onChange={handleChange} />
+        <Field label={t("form.companyZh")} value={data.company_zh} field="company_zh" onChange={handleChange} />
+        <Field label={t("form.companyEn")} value={data.company_en} field="company_en" onChange={handleChange} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="中文職稱" value={data.title_zh} field="title_zh" onChange={handleChange} />
-        <Field label="英文職稱" value={data.title_en} field="title_en" onChange={handleChange} />
+        <Field label={t("form.titleZh")} value={data.title_zh} field="title_zh" onChange={handleChange} />
+        <Field label={t("form.titleEn")} value={data.title_en} field="title_en" onChange={handleChange} />
       </div>
 
       <Field
-        label="Email"
+        label={t("form.email")}
         value={data.email}
         field="email"
         onChange={handleChange}
         type="email"
         highlight
+        highlightPlaceholder={t("form.manualInput")}
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <Field label="電話" value={data.phone} field="phone" onChange={handleChange} type="tel" />
-        <Field label="手機" value={data.mobile} field="mobile" onChange={handleChange} type="tel" />
+        <Field label={t("form.phone")} value={data.phone} field="phone" onChange={handleChange} type="tel" />
+        <Field label={t("form.mobile")} value={data.mobile} field="mobile" onChange={handleChange} type="tel" />
       </div>
 
-      <Field label="地址" value={data.address} field="address" onChange={handleChange} />
-      <Field label="網站" value={data.website} field="website" onChange={handleChange} type="url" />
+      <Field label={t("form.address")} value={data.address} field="address" onChange={handleChange} />
+      <Field label={t("form.website")} value={data.website} field="website" onChange={handleChange} type="url" />
 
       <details className="pt-1">
         <summary className="text-sm font-medium text-gray-500 cursor-pointer">
-          社群帳號
+          {t("form.social")}
         </summary>
         <div className="mt-2 space-y-3">
           <Field label="LinkedIn" value={data.social?.linkedin} field="social.linkedin" onChange={handleChange} />
           <Field label="Twitter / X" value={data.social?.twitter} field="social.twitter" onChange={handleChange} />
           <Field label="LINE" value={data.social?.line} field="social.line" onChange={handleChange} />
           <Field label="WeChat" value={data.social?.wechat} field="social.wechat" onChange={handleChange} />
-          <Field label="其他" value={data.social?.other} field="social.other" onChange={handleChange} />
+          <Field label={t("form.other")} value={data.social?.other} field="social.other" onChange={handleChange} />
         </div>
       </details>
 
-      <Field label="備註" value={data.notes} field="notes" onChange={handleChange} />
+      <Field label={t("form.notes")} value={data.notes} field="notes" onChange={handleChange} />
     </div>
   );
 }

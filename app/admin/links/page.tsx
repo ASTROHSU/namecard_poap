@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n";
 
 interface PoapCode {
   id: number;
@@ -15,6 +16,7 @@ interface PoapCode {
 }
 
 export default function AdminLinksPage() {
+  const { t } = useI18n();
   const [codes, setCodes] = useState<PoapCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
@@ -48,7 +50,7 @@ export default function AdminLinksPage() {
       .filter(Boolean);
 
     if (parsed.length === 0) {
-      setMessage("請輸入至少一個 code");
+      setMessage(t("admin.enterCode"));
       setSubmitting(false);
       return;
     }
@@ -77,7 +79,7 @@ export default function AdminLinksPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
-        <h1 className="text-lg font-semibold">POAP 管理</h1>
+        <h1 className="text-lg font-semibold">{t("admin.title")}</h1>
       </header>
 
       <main className="p-4 max-w-lg mx-auto space-y-6">
@@ -85,32 +87,32 @@ export default function AdminLinksPage() {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
             <p className="text-2xl font-bold text-gray-900">{codes.length}</p>
-            <p className="text-xs text-gray-500 mt-1">總數</p>
+            <p className="text-xs text-gray-500 mt-1">{t("admin.total")}</p>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
             <p className="text-2xl font-bold text-green-600">{available}</p>
-            <p className="text-xs text-gray-500 mt-1">可用</p>
+            <p className="text-xs text-gray-500 mt-1">{t("admin.available")}</p>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
             <p className="text-2xl font-bold text-purple-600">{used}</p>
-            <p className="text-xs text-gray-500 mt-1">已分配</p>
+            <p className="text-xs text-gray-500 mt-1">{t("admin.assigned")}</p>
           </div>
         </div>
 
         {/* Add codes form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 border border-gray-100 space-y-3">
-          <h2 className="font-medium text-gray-900">新增 POAP Codes</h2>
+          <h2 className="font-medium text-gray-900">{t("admin.addCodes")}</h2>
           <input
             type="text"
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
-            placeholder="Event 名稱（選填，如 2026）"
+            placeholder={t("admin.eventPlaceholder")}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
           />
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="貼上 POAP claim codes，每行一個或用逗號分隔"
+            placeholder={t("admin.codesPlaceholder")}
             rows={6}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
           />
@@ -122,18 +124,18 @@ export default function AdminLinksPage() {
             disabled={submitting || !input.trim()}
             className="w-full py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium disabled:opacity-50 active:scale-[0.98] transition-transform"
           >
-            {submitting ? "處理中..." : "新增"}
+            {submitting ? t("admin.submitting") : t("admin.submit")}
           </button>
         </form>
 
         {/* Codes list */}
         <div>
-          <h2 className="font-medium text-gray-900 mb-3">Codes 列表</h2>
+          <h2 className="font-medium text-gray-900 mb-3">{t("admin.codesList")}</h2>
           {loading ? (
-            <div className="text-center text-gray-400 py-8">載入中...</div>
+            <div className="text-center text-gray-400 py-8">{t("admin.loading")}</div>
           ) : codes.length === 0 ? (
             <div className="bg-white rounded-xl p-8 border border-gray-100 text-center text-gray-400">
-              尚未新增任何 POAP codes
+              {t("admin.noCodes")}
             </div>
           ) : (
             <div className="space-y-2">
@@ -150,17 +152,17 @@ export default function AdminLinksPage() {
                     </code>
                     {c.assigned_to ? (
                       <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                        已分配
+                        {t("admin.assigned")}
                       </span>
                     ) : (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                        可用
+                        {t("admin.available")}
                       </span>
                     )}
                   </div>
                   {c.assigned_to && (
                     <p className="text-xs text-gray-500 mt-1">
-                      → {c.name_zh || c.name_en || c.contact_email || "未知"}
+                      → {c.name_zh || c.name_en || c.contact_email || t("home.unknown")}
                     </p>
                   )}
                 </div>

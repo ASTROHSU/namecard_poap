@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useI18n, LanguageToggle } from "@/lib/i18n";
 
 export default function LoginPage() {
+  const { t } = useI18n();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ export default function LoginPage() {
     if (res.ok) {
       router.push("/");
     } else {
-      setError("PIN 碼錯誤");
+      setError(t("login.error"));
       setPin("");
     }
     setLoading(false);
@@ -33,8 +35,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">POAP 名片</h1>
-          <p className="text-gray-500 mt-1">請輸入 PIN 碼</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("login.title")}</h1>
+          <p className="text-gray-500 mt-1">{t("login.prompt")}</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -43,7 +45,7 @@ export default function LoginPage() {
             pattern="[0-9]*"
             value={pin}
             onChange={(e) => setPin(e.target.value)}
-            placeholder="PIN"
+            placeholder={t("login.placeholder")}
             className="w-full px-4 py-3 text-center text-2xl tracking-widest border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
             autoFocus
           />
@@ -55,9 +57,12 @@ export default function LoginPage() {
             disabled={loading || !pin}
             className="w-full py-3 bg-gray-900 text-white rounded-xl font-medium disabled:opacity-50 active:scale-[0.98] transition-transform"
           >
-            {loading ? "驗證中..." : "進入"}
+            {loading ? t("login.loading") : t("login.submit")}
           </button>
         </form>
+        <div className="mt-6 text-center">
+          <LanguageToggle />
+        </div>
       </div>
     </div>
   );

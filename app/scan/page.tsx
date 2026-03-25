@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import CameraCapture from "@/components/CameraCapture";
 import ContactForm from "@/components/ContactForm";
 import type { CardData } from "@/lib/claude";
+import { useI18n } from "@/lib/i18n";
 
-type Step = "capture" | "scanning" | "review" | "sending" | "done" | "error";
+type Step = "capture" | "scanning" | "review" | "confirm" | "sending" | "done" | "error";
 
 export default function ScanPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [step, setStep] = useState<Step>("capture");
   const [imageData, setImageData] = useState<{ base64: string; mediaType: string } | null>(null);
   const [cardData, setCardData] = useState<CardData | null>(null);
@@ -35,7 +37,7 @@ export default function ScanPage() {
       setCardData(data);
       setStep("review");
     } catch {
-      setError("辨識失敗，請重試");
+      setError(t("scan.scanFailed"));
       setStep("error");
     }
   }
@@ -62,7 +64,7 @@ export default function ScanPage() {
       setWarnings(data.warnings || []);
       setStep("done");
     } catch {
-      setError("送出失敗，請重試");
+      setError(t("scan.sendFailed"));
       setStep("error");
     }
   }
@@ -79,7 +81,7 @@ export default function ScanPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="text-lg font-semibold">掃描名片</h1>
+        <h1 className="text-lg font-semibold">{t("scan.title")}</h1>
       </header>
 
       <main className="p-4 pb-32 max-w-lg mx-auto">
@@ -94,7 +96,7 @@ export default function ScanPage() {
           <div className="mt-6 text-center">
             <div className="inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-full shadow-sm border border-gray-200">
               <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm font-medium text-gray-700">AI 辨識中...</span>
+              <span className="text-sm font-medium text-gray-700">{t("scan.scanning")}</span>
             </div>
           </div>
         )}
@@ -103,9 +105,21 @@ export default function ScanPage() {
         {step === "review" && cardData && (
           <div className="mt-6 space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-sm text-green-800">
-              辨識完成，請確認資料
+              {t("scan.recognized")}
             </div>
             <ContactForm data={cardData} onChange={setCardData} />
+          </div>
+        )}
+
+        {/* Confirm before sending email */}
+        {step === "confirm" && cardData && (
+          <div className="mt-6 space-y-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-900">
+              <p className="font-semibold mb-2">{t("scan.confirmTitle")}</p>
+              <p>{t("scan.confirmMsg")}</p>
+              <p className="mt-1 font-medium">{cardData.name_zh || cardData.name_en || t("scan.noName")}</p>
+              <p className="text-amber-700">{cardData.email}</p>
+            </div>
           </div>
         )}
 
@@ -119,7 +133,7 @@ export default function ScanPage() {
               onClick={() => setStep("capture")}
               className="text-sm text-gray-600 underline"
             >
-              重新開始
+              {t("scan.retry")}
             </button>
           </div>
         )}
@@ -133,10 +147,10 @@ export default function ScanPage() {
               </svg>
             </div>
             <p className="font-semibold text-gray-900">
-              {didSaveOnly ? "存檔成功！" : "送出成功！"}
+              {didSaveOnly ? t("scan.saveSuccess") : t("scan.sendSuccess")}
             </p>
             <p className="text-sm text-gray-500">
-              {didSaveOnly ? "名片已存檔" : "名片已存檔，Email 已發送"}
+              {didSaveOnly ? t("scan.savedNote") : t("scan.sentNote")}
             </p>
             {warnings.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm text-amber-800 text-left">
@@ -156,13 +170,13 @@ export default function ScanPage() {
                 }}
                 className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium active:scale-95 transition-transform"
               >
-                繼續掃描
+                {t("scan.continue")}
               </button>
               <button
                 onClick={() => router.push("/contacts")}
                 className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium active:scale-95 transition-transform"
               >
-                查看聯絡人
+                {t("scan.viewContacts")}
               </button>
             </div>
           </div>
@@ -173,27 +187,45 @@ export default function ScanPage() {
           <div className="mt-6 text-center">
             <div className="inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-full shadow-sm border border-gray-200">
               <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm font-medium text-gray-700">處理中...</span>
+              <span className="text-sm font-medium text-gray-700">{t("scan.sending")}</span>
             </div>
           </div>
         )}
       </main>
 
-      {/* Bottom actions */}
+      {/* Bottom actions - review step */}
       {step === "review" && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 space-y-2">
           <button
-            onClick={() => handleSend(false)}
+            onClick={() => setStep("confirm")}
             disabled={!cardData?.email}
             className="w-full py-3 bg-gray-900 text-white rounded-xl font-medium disabled:opacity-40 active:scale-[0.98] transition-transform"
           >
-            {cardData?.email ? "確認並送出" : "缺少 Email，無法送出"}
+            {cardData?.email ? t("scan.confirmSend") : t("scan.noEmail")}
           </button>
           <button
             onClick={() => handleSend(true)}
             className="w-full py-2.5 text-gray-600 text-sm font-medium active:scale-[0.98] transition-transform"
           >
-            僅存檔（不送 Email / POAP）
+            {t("scan.saveOnly")}
+          </button>
+        </div>
+      )}
+
+      {/* Bottom actions - confirm step */}
+      {step === "confirm" && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 space-y-2">
+          <button
+            onClick={() => handleSend(false)}
+            className="w-full py-3 bg-green-700 text-white rounded-xl font-medium active:scale-[0.98] transition-transform"
+          >
+            {t("scan.confirmBtn")}
+          </button>
+          <button
+            onClick={() => setStep("review")}
+            className="w-full py-2.5 text-gray-600 text-sm font-medium active:scale-[0.98] transition-transform"
+          >
+            {t("scan.backEdit")}
           </button>
         </div>
       )}

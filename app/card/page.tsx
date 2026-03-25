@@ -1,23 +1,19 @@
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "許明恩 Astro Hsu — 區塊勢 Blocktrend",
-  description:
-    "區塊勢創辦人許明恩的數位名片。區塊勢是台灣最大的繁體中文 Web3 訂閱媒體。",
-  openGraph: {
-    title: "許明恩 Astro Hsu — 區塊勢 Blocktrend",
-    description:
-      "區塊勢創辦人許明恩的數位名片。區塊勢是台灣最大的繁體中文 Web3 訂閱媒體。",
-    type: "profile",
-  },
-};
+import { useI18n, LanguageToggle } from "@/lib/i18n";
 
 export default function CardPage() {
+  const { t } = useI18n();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center">
       <main className="w-full max-w-md px-6 py-12">
+        {/* Language toggle */}
+        <div className="flex justify-end mb-4">
+          <LanguageToggle />
+        </div>
+
         {/* Avatar / Visual */}
         <div className="text-center mb-8">
           <div className="w-28 h-28 mx-auto bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center text-white text-4xl font-bold mb-5 shadow-lg">
@@ -34,7 +30,7 @@ export default function CardPage() {
         {/* Contact info */}
         <div className="space-y-3 mb-8">
           <a
-            href="mailto:astro@blocktrend.today"
+            href="mailto:mn@blocktrend.today"
             className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
           >
             <span className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 shrink-0">
@@ -44,12 +40,12 @@ export default function CardPage() {
             </span>
             <div>
               <p className="text-sm text-gray-500">Email</p>
-              <p className="text-sm font-medium text-gray-900">astro@blocktrend.today</p>
+              <p className="text-sm font-medium text-gray-900">mn@blocktrend.today</p>
             </div>
           </a>
 
           <a
-            href="https://blocktrend.substack.com"
+            href="https://blocktrend.today"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
@@ -60,13 +56,13 @@ export default function CardPage() {
               </svg>
             </span>
             <div>
-              <p className="text-sm text-gray-500">Website</p>
-              <p className="text-sm font-medium text-gray-900">blocktrend.substack.com</p>
+              <p className="text-sm text-gray-500">{t("form.website")}</p>
+              <p className="text-sm font-medium text-gray-900">blocktrend.today</p>
             </div>
           </a>
 
           <a
-            href="https://x.com/aspect_astro"
+            href="https://x.com/mnhsuTW"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
@@ -76,7 +72,7 @@ export default function CardPage() {
             </span>
             <div>
               <p className="text-sm text-gray-500">X (Twitter)</p>
-              <p className="text-sm font-medium text-gray-900">@aspect_astro</p>
+              <p className="text-sm font-medium text-gray-900">@mnhsuTW</p>
             </div>
           </a>
         </div>
@@ -98,16 +94,16 @@ export default function CardPage() {
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
-            儲存聯絡資訊
+            {t("card.save")}
           </a>
         </div>
 
         {/* Footer note */}
         <div className="mt-12 pt-6 border-t border-gray-100 text-center">
           <p className="text-xs text-gray-400 leading-relaxed">
-            這張名片是一個 POAP，永久保存在區塊鏈上。
+            {t("card.footer1")}
             <br />
-            不需要錢包也可以查看所有資訊。
+            {t("card.footer2")}
           </p>
         </div>
       </main>
