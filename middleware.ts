@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/card", "/api/auth", "/api/vcard"];
+const PUBLIC_PATHS = ["/login", "/card", "/api/auth", "/api/vcard", "/index.html"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Allow root path (serves public/index.html namecard)
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
 
   // Allow public paths
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
