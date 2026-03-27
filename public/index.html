@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>許明恩 — 區塊勢</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #f5f0e8;
+    --bg-card: #ede6da;
+    --surface: #fffdf9;
+    --ink: #1a1714;
+    --ink-mid: #4a443c;
+    --ink-light: #7a7268;
+    --ink-faint: #b8b0a4;
+    --ink-ghost: #ddd6ca;
+    --accent: #6b5b3e;
+    --accent-light: #a89470;
+    --border: rgba(26,23,20,0.06);
+    --border-hover: rgba(26,23,20,0.13);
+    --radius: 14px;
+    --radius-sm: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    min-height:100vh; min-height:100dvh;
+    display:flex; justify-content:center;
+    position:relative; overflow-x:hidden;
+  }
+
+  /* ========================================
+     全版山景背景
+     ======================================== */
+  .bg-photo {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    z-index:0; pointer-events:none; overflow:hidden;
+  }
+  .bg-photo img {
+    width:100%; height:100%; object-fit:cover; object-position:center 30%;
+    opacity:0.35;
+  }
+  .bg-photo::after {
+    content:''; position:absolute; bottom:0; left:0; right:0;
+    height:65%; background:linear-gradient(to top, var(--bg) 0%, transparent 100%);
+  }
+
+  /* QR Modal */
+  .qr-overlay {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.5); z-index:100;
+    display:none; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  }
+  .qr-overlay.show { display:flex; }
+  .qr-modal {
+    background:white; border-radius:20px; padding:32px;
+    text-align:center; position:relative;
+    max-width:340px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2);
+  }
+  .qr-modal-title {
+    font-family:'Noto Serif TC',serif;
+    font-size:18px; font-weight:700; color:var(--ink);
+    margin-bottom:20px;
+  }
+  .qr-modal img {
+    width:200px; height:200px; border-radius:8px;
+  }
+  .qr-modal-url {
+    margin-top:16px; font-size:13px; color:var(--ink-light);
+    word-break:break-all;
+  }
+  .qr-close {
+    position:absolute; top:12px; right:16px;
+    background:none; border:none; font-size:22px;
+    color:var(--ink-faint); cursor:pointer; line-height:1;
+    transition:color .2s;
+  }
+  .qr-close:hover { color:var(--ink); }
+
+  .page {
+    width:100%; max-width:440px;
+    min-height:100vh; min-height:100dvh;
+    padding:0 20px 48px;
+    display:flex; flex-direction:column; align-items:center;
+    position:relative; z-index:2;
+  }
+
+  .section { width:100%; position:relative; z-index:1; }
+  .section-label {
+    font-size:11px; font-weight:600; letter-spacing:2px;
+    text-transform:uppercase; color:var(--ink-faint);
+    margin-bottom:12px; padding-left:2px;
+  }
+
+  /* ========================================
+     區塊一：我是誰
+     ======================================== */
+  .hero {
+    padding-top:20px;
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; margin-bottom:28px;
+  }
+  .avatar {
+    width:100px; height:100px; border-radius:50%; overflow:hidden;
+    border:3px solid var(--surface);
+    box-shadow:0 4px 20px rgba(26,23,20,0.08);
+    margin-bottom:16px;
+  }
+  .avatar img { width:100%; height:100%; object-fit:cover; object-position:center 15%; }
+
+  .hero-name {
+    font-family:'Noto Serif TC',serif;
+    font-size:26px; font-weight:900; color:var(--ink);
+    letter-spacing:5px; line-height:1; margin-bottom:6px;
+  }
+  .hero-title {
+    font-size:13px; color:var(--ink-light);
+    letter-spacing:.5px; margin-bottom:18px;
+  }
+  .hero-bio {
+    font-family:'Noto Serif TC',serif;
+    font-size:14.5px; color:var(--ink-mid);
+    line-height:1.85; max-width:360px; text-align:center;
+  }
+
+  .hero-badge {
+    display:inline-block; margin-top:14px;
+    padding:5px 14px; border-radius:20px;
+    background:rgba(107,91,62,0.07); border:1px solid rgba(107,91,62,0.12);
+    font-size:12px; color:var(--accent); font-weight:500;
+    text-decoration:none; transition:all .2s;
+    letter-spacing:.3px;
+  }
+  .hero-badge:hover { background:rgba(107,91,62,0.12); border-color:rgba(107,91,62,0.2); }
+
+  /* 頂部工具列（在 .page 內） */
+  .top-actions {
+    display:flex; gap:8px; align-self:flex-end;
+    padding-top:16px; padding-bottom:0;
+  }
+  .top-btn {
+    width:36px; height:36px; border-radius:50%;
+    border:1px solid var(--border-hover); background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s; color:var(--ink-light);
+    box-shadow:0 1px 4px rgba(26,23,20,0.04);
+  }
+  .top-btn:hover { border-color:var(--ink-faint); color:var(--ink); }
+  .top-btn svg { width:15px; height:15px; }
+
+  /* ========================================
+     區塊二：我在做的事（主角）
+     ======================================== */
+  .roles-section { margin-bottom:28px; }
+
+  .role-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:20px;
+    margin-bottom:10px; transition:all .2s;
+    text-decoration:none; color:inherit; display:block;
+  }
+  .role-card:last-of-type { margin-bottom:0; }
+  .role-card:hover { border-color:var(--border-hover); box-shadow:0 2px 10px rgba(26,23,20,0.04); }
+
+  .role-header {
+    display:flex; align-items:center; gap:14px; margin-bottom:10px;
+  }
+
+  .role-logo {
+    width:44px; height:44px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; overflow:hidden;
+  }
+  .role-logo img {
+    width:100%; height:100%; object-fit:cover; border-radius:10px;
+  }
+  /* 佔位用 — 等你給 URL 後替換 */
+  .role-logo.blocktrend { background:#f4f1eb; }
+  .role-logo.blocktrend img { object-fit:contain; padding:6px; }
+  .role-logo.stevechoice { background:#ffffff; border-radius:10px; }
+  .role-logo.twex { background:transparent; border-radius:10px; }
+  .role-logo.twex img { width:100%; height:100%; object-fit:cover; border-radius:10px; }
+  .role-logo.fluidkey { background:#2d3142; border-radius:10px; }
+  .role-logo.fluidkey img { object-fit:contain; padding:6px; }
+
+  .role-info { flex:1; min-width:0; }
+  .role-name {
+    font-size:15px; font-weight:600; color:var(--ink); line-height:1.3;
+  }
+  .role-title-tag {
+    font-size:12px; color:var(--ink-light); margin-top:2px;
+  }
+
+  .role-desc {
+    font-size:13.5px; color:var(--ink-mid); line-height:1.75;
+    font-family:'Noto Serif TC',serif;
+  }
+
+  .role-stats {
+    display:inline-flex; align-items:center; gap:6px;
+    margin-top:8px; padding:4px 10px;
+    background:rgba(107,91,62,0.05); border-radius:6px;
+    font-size:12px; color:var(--accent); font-weight:600;
+  }
+
+  /* ========================================
+     推薦書籍
+     ======================================== */
+  .books-section { margin-bottom:28px; }
+
+  .books-grid {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+  }
+
+  .book-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); overflow:hidden;
+    text-decoration:none; color:inherit; transition:all .2s;
+  }
+  .book-card:hover {
+    border-color:var(--border-hover);
+    box-shadow:0 4px 16px rgba(26,23,20,0.06);
+    transform:translateY(-2px);
+  }
+
+  .book-cover {
+    width:100%; aspect-ratio:3/4;
+    background:var(--bg-card); overflow:hidden;
+  }
+  .book-cover img { width:100%; height:100%; object-fit:cover; }
+
+  .book-info { padding:10px 12px; }
+  .book-title {
+    font-size:13px; font-weight:600; color:var(--ink); line-height:1.4;
+  }
+  .book-role {
+    font-size:11px; color:var(--ink-light); margin-top:2px;
+  }
+
+  /* ========================================
+     區塊三：聯絡方式
+     ======================================== */
+  .contact-section { margin-bottom:28px; }
+
+  .contact-grid {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+  }
+
+  .contact-item {
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:16px 8px;
+    text-decoration:none; color:inherit; transition:all .2s;
+  }
+  .contact-item:hover {
+    border-color:var(--border-hover);
+    box-shadow:0 2px 8px rgba(26,23,20,0.04);
+    transform:translateY(-1px);
+  }
+  .ci-icon {
+    width:36px; height:36px; border-radius:10px;
+    background:var(--bg-card);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-mid); transition:all .2s;
+  }
+  .ci-icon svg { width:17px; height:17px; }
+  .contact-item:hover .ci-icon { background:var(--accent-light); color:white; }
+  .ci-label { font-size:12px; font-weight:500; color:var(--ink-mid); text-align:center; }
+
+  .contact-extras { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+  .contact-row {
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:12px 16px;
+    text-decoration:none; color:inherit; transition:all .2s;
+  }
+  .contact-row:hover {
+    border-color:var(--border-hover);
+    box-shadow:0 2px 8px rgba(26,23,20,0.04);
+    transform:translateY(-1px);
+  }
+  .cr-icon {
+    width:28px; height:28px; border-radius:7px; background:var(--bg-card);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; color:var(--ink-mid); transition:all .2s;
+  }
+  .cr-icon svg { width:14px; height:14px; }
+  .contact-row:hover .cr-icon { background:var(--accent-light); color:white; }
+  .cr-label { font-size:13px; font-weight:500; color:var(--ink); flex:1; }
+  .cr-arrow { font-size:12px; color:var(--ink-faint); opacity:.3; transition:all .2s; }
+  .contact-row:hover .cr-arrow { opacity:1; transform:translateX(2px); }
+
+
+  @media (max-width:380px) {
+    .page { padding:0 16px 40px; }
+    .contact-grid { grid-template-columns:1fr 1fr; }
+  }
+
+  @media (min-width:441px) {
+    .page { min-height:auto; padding-bottom:36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-photo">
+  <img id="bgImg"
+    src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Mount_Yu_Shan_-_Taiwan.jpg/1920px-Mount_Yu_Shan_-_Taiwan.jpg"
+    onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Yushannationalpark.jpg/1920px-Yushannationalpark.jpg'"
+    alt="玉山">
+</div>
+
+<div class="qr-overlay" id="qrOverlay" onclick="closeQR(event)">
+  <div class="qr-modal">
+    <button class="qr-close" onclick="closeQR()">&times;</button>
+    <div class="qr-modal-title">我的名片</div>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://card.blocktrend.today" alt="QR Code">
+    <div class="qr-modal-url">https://card.blocktrend.today</div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="top-actions">
+    <button class="top-btn" onclick="shareCard()" title="分享">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+    </button>
+    <button class="top-btn" onclick="showQR()" title="QR Code">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/></svg>
+    </button>
+    <button class="top-btn" onclick="toggleLang()" id="langBtn" style="border-radius:20px;width:auto;padding:0 12px;font-size:11px;font-weight:600;letter-spacing:.5px;">EN</button>
+  </div>
+
+  <!-- ====== 區塊一：我是誰 ====== -->
+  <div class="section hero">
+    <div class="avatar">
+      <img src="https://i.urusai.cc/RW2O0.jpg" alt="許明恩">
+    </div>
+    <div class="hero-name" id="hero-name">許明恩</div>
+    <div class="hero-title" id="hero-title">區塊勢創辦人</div>
+    <p class="hero-bio" id="bio">Web3 電子報 ・Podcast 主持人 ・20,000+ 訂閱者</p>
+    <a class="hero-badge" href="https://www.bnext.com.tw/article/89549/blockchain2026-blocktrend-web3" target="_blank" id="hero-badge">數位時代 2025、2026 區塊鏈影響力人物</a>
+  </div>
+
+  <!-- ====== 聯絡方式 ====== -->
+  <div class="section contact-section">
+    <div class="section-label" id="label-contact">聯絡方式</div>
+
+    <div class="contact-grid">
+      <a class="contact-item" href="mailto:mn@blocktrend.today">
+        <div class="ci-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg></div>
+        <span class="ci-label">Email</span>
+      </a>
+      <a class="contact-item" href="https://line.me/ti/p/_06C3e_WdH" target="_blank">
+        <div class="ci-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg></div>
+        <span class="ci-label">LINE</span>
+      </a>
+      <a class="contact-item" href="https://www.facebook.com/MNHSU/" target="_blank">
+        <div class="ci-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div>
+        <span class="ci-label">Facebook</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ====== 我在做的事（頁面重點） ====== -->
+  <div class="section roles-section">
+    <div class="section-label" id="label-roles">我在做的事</div>
+
+    <a class="role-card" href="https://blocktrend.today/" target="_blank">
+      <div class="role-header">
+        <div class="role-logo blocktrend">
+          <img src="https://i.urusai.cc/yaku8.png" alt="區塊勢">
+        </div>
+        <div class="role-info">
+          <div class="role-name" id="role1-name">區塊勢</div>
+          <div class="role-title-tag" id="role1-title">創辦人</div>
+        </div>
+      </div>
+      <p class="role-desc" id="role1-desc">臺灣最多人訂閱的 Web3 電子報與 Podcast。</p>
+      <div class="role-stats" id="role1-stats">📊 20,000+ 訂閱者 · 2017 年至今</div>
+    </a>
+
+    <a class="role-card" href="https://www.twex.tw/" target="_blank">
+      <div class="role-header">
+        <div class="role-logo twex">
+          <img src="https://i.urusai.cc/NbZJU.png" alt="富昇數位">
+        </div>
+        <div class="role-info">
+          <div class="role-name" id="role2-name">富昇數位（TWEX 台灣大虛擬資產交易所）</div>
+          <div class="role-title-tag" id="role2-title">董事</div>
+        </div>
+      </div>
+      <p class="role-desc" id="role2-desc">台灣大哥大子公司，經營台灣大虛擬資產交易所，參與產業治理與跨界合作。</p>
+    </a>
+
+    <a class="role-card" href="https://fluidkey.com/" target="_blank">
+      <div class="role-header">
+        <div class="role-logo fluidkey">
+          <img src="https://i.urusai.cc/kid8v.png" alt="Fluidkey">
+        </div>
+        <div class="role-info">
+          <div class="role-name" id="role3-name">Fluidkey</div>
+          <div class="role-title-tag" id="role3-title">顧問</div>
+        </div>
+      </div>
+      <p class="role-desc" id="role3-desc">以隱匿地址技術保護鏈上支付隱私的自託管錢包，協助其產品進入臺灣市場。</p>
+    </a>
+
+    <a class="role-card" href="https://stevechoice.org/" target="_blank">
+      <div class="role-header">
+        <div class="role-logo stevechoice">
+          <img src="https://i.urusai.cc/TvY5E.png" alt="兆量富足">
+        </div>
+        <div class="role-info">
+          <div class="role-name" id="role4-name">兆量富足教育協會</div>
+          <div class="role-title-tag" id="role4-title">區塊鏈顧問</div>
+        </div>
+      </div>
+      <p class="role-desc" id="role4-desc">推動區塊鏈教育普及，協助更多人理解去中心化技術的實際應用與社會意義。</p>
+    </a>
+  </div>
+
+  <!-- ====== 推薦書籍 ====== -->
+  <div class="section books-section">
+    <div class="section-label" id="label-books">審訂與推薦</div>
+
+    <div class="books-grid">
+      <a class="book-card" href="https://bookzone.cwgv.com.tw/book/BCB849" target="_blank">
+        <div class="book-cover">
+          <img src="https://i.urusai.cc/J2LKr.png" alt="Read Write Own">
+        </div>
+        <div class="book-info">
+          <div class="book-title" id="book1-title">Read Write Own</div>
+          <div class="book-role" id="book1-role">審定</div>
+        </div>
+      </a>
+      <a class="book-card" href="https://www.books.com.tw/products/0010903379" target="_blank">
+        <div class="book-cover">
+          <img src="https://www.books.com.tw/img/001/090/33/0010903379.jpg" alt="以太奇襲">
+        </div>
+        <div class="book-info">
+          <div class="book-title" id="book2-title">以太奇襲</div>
+          <div class="book-role" id="book2-role">推薦序</div>
+        </div>
+      </a>
+      <a class="book-card" href="https://readmoo.com/book/210339629000101" target="_blank">
+        <div class="book-cover">
+          <img src="https://i.urusai.cc/wL4UY.png" alt="無限風暴">
+        </div>
+        <div class="book-info">
+          <div class="book-title" id="book3-title">無限風暴</div>
+          <div class="book-role" id="book3-role">推薦序</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+let locale = 'zh';
+
+const i18n = {
+  zh: {
+    heroName:'許明恩', heroTitle:'區塊勢創辦人',
+    bio:'Web3 電子報 ・Podcast 主持人 ・20,000+ 訂閱者',
+    heroBadge:'數位時代 2025、2026 區塊鏈影響力人物',
+    labelRoles:'我在做的事', labelBooks:'審訂與推薦', labelContact:'聯絡方式',
+    book1Title:'Read Write Own', book1Role:'審定',
+    book2Title:'以太奇襲', book2Role:'推薦序',
+    book3Title:'無限風暴', book3Role:'推薦序',
+    role1Name:'區塊勢', role1Title:'創辦人',
+    role1Desc:'臺灣最多人訂閱的 Web3 電子報與 Podcast。',
+    role1Stats:'📊 20,000+ 訂閱者 · 2017 年至今',
+    role2Name:'富昇數位（TWEX 台灣大虛擬資產交易所）', role2Title:'董事',
+    role2Desc:'台灣大哥大子公司，經營台灣大虛擬資產交易所，參與產業治理與跨界合作。',
+    role3Name:'Fluidkey', role3Title:'顧問',
+    role3Desc:'以隱匿地址技術保護鏈上支付隱私的自託管錢包，協助其產品進入臺灣市場。',
+    role4Name:'兆量富足教育協會', role4Title:'區塊鏈顧問',
+    role4Desc:'推動區塊鏈教育普及，協助更多人理解去中心化技術的實際應用與社會意義。'
+  },
+  en: {
+    heroName:'Astro Hsu', heroTitle:'Founder, Blocktrend',
+    bio:"Blockchain Newsletter ・Podcast Host ・20,000+ Subscribers",
+    heroBadge:'BusinessNext Blockchain Influencer 2025 & 2026',
+    labelRoles:'What I Do', labelBooks:'Review & Endorsement', labelContact:'Contact',
+    book1Title:'Read Write Own', book1Role:'Reviewer',
+    book2Title:'The Infinite Machine', book2Role:'Foreword',
+    book3Title:'Number Go Up', book3Role:'Foreword',
+    role1Name:'Blocktrend', role1Title:'Founder',
+    role1Desc:"Taiwan's most-subscribed Web3 newsletter and podcast.",
+    role1Stats:'📊 20,000+ subscribers · Since 2017',
+    role2Name:'TWEX (Taiwan Virtual Asset Exchange)', role2Title:'Board Director',
+    role2Desc:"A subsidiary of Taiwan Mobile, operating Taiwan's regulated virtual asset exchange.",
+    role3Name:'Fluidkey', role3Title:'Advisor',
+    role3Desc:'A self-custodial wallet using stealth addresses to protect on-chain payment privacy. Helping bring the product to the Taiwan market.',
+    role4Name:'Steve Choice Education Assoc.', role4Title:'Blockchain Advisor',
+    role4Desc:'Promoting blockchain education and helping people understand the practical applications of decentralized technology.'
+  }
+};
+
+function toggleLang() {
+  locale = locale==='zh'?'en':'zh';
+  const t = i18n[locale];
+  document.getElementById('langBtn').textContent = locale==='zh'?'EN':'中文';
+  document.getElementById('hero-name').textContent = t.heroName;
+  document.getElementById('hero-title').textContent = t.heroTitle;
+  document.getElementById('bio').textContent = t.bio;
+  document.getElementById('hero-badge').textContent = t.heroBadge;
+  document.getElementById('label-roles').textContent = t.labelRoles;
+  document.getElementById('label-books').textContent = t.labelBooks;
+  document.getElementById('label-contact').textContent = t.labelContact;
+  document.getElementById('book1-title').textContent = t.book1Title;
+  document.getElementById('book1-role').textContent = t.book1Role;
+  document.getElementById('book2-title').textContent = t.book2Title;
+  document.getElementById('book2-role').textContent = t.book2Role;
+  document.getElementById('book3-title').textContent = t.book3Title;
+  document.getElementById('book3-role').textContent = t.book3Role;
+  document.getElementById('role1-name').textContent = t.role1Name;
+  document.getElementById('role1-title').textContent = t.role1Title;
+  document.getElementById('role1-desc').textContent = t.role1Desc;
+  document.getElementById('role1-stats').textContent = t.role1Stats;
+  document.getElementById('role2-name').textContent = t.role2Name;
+  document.getElementById('role2-title').textContent = t.role2Title;
+  document.getElementById('role2-desc').textContent = t.role2Desc;
+  document.getElementById('role3-name').textContent = t.role3Name;
+  document.getElementById('role3-title').textContent = t.role3Title;
+  document.getElementById('role3-desc').textContent = t.role3Desc;
+  document.getElementById('role4-name').textContent = t.role4Name;
+  document.getElementById('role4-title').textContent = t.role4Title;
+  document.getElementById('role4-desc').textContent = t.role4Desc;
+}
+
+// ========================================
+// 分享 & QR
+// ========================================
+function shareCard() {
+  const url = 'https://card.blocktrend.today';
+  if (navigator.share) {
+    navigator.share({ title:'許明恩 — 區塊勢', url });
+  } else {
+    navigator.clipboard.writeText(url);
+    alert('已複製名片連結');
+  }
+}
+
+function showQR() {
+  document.getElementById('qrOverlay').classList.add('show');
+}
+
+function closeQR(e) {
+  if (!e || e.target === e.currentTarget || e.target.classList.contains('qr-close')) {
+    document.getElementById('qrOverlay').classList.remove('show');
+  }
+}
+</script>
+
+</body>
+</html>
