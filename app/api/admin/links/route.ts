@@ -31,8 +31,17 @@ export async function POST(request: Request) {
 
     const sql = getDb();
 
-    // Filter out empty strings and duplicates
-    const uniqueCodes = [...new Set(codes.map((c: string) => c.trim()).filter(Boolean))];
+    // Extract code from URL if full URL is provided, filter out empty strings and duplicates
+    const uniqueCodes = [...new Set(
+      codes
+        .map((c: string) => {
+          const trimmed = c.trim();
+          // Support full URLs like https://poap.xyz/mint/abc123
+          const match = trimmed.match(/poap\.xyz\/mint\/([a-zA-Z0-9]+)/);
+          return match ? match[1] : trimmed;
+        })
+        .filter(Boolean)
+    )];
 
     let inserted = 0;
     for (const code of uniqueCodes) {

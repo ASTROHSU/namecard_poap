@@ -23,5 +23,5 @@ export async function assignPoapCode(
 }
 
 export function getPoapClaimUrl(code: string): string {
-  return `https://app.poap.xyz/claim/${code}`;
+  return `https://poap.xyz/mint/${code}`;
 }
