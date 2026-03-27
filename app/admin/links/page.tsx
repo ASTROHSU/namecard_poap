@@ -10,6 +10,7 @@ interface PoapCode {
   event_name: string | null;
   assigned_to: string | null;
   assigned_at: string | null;
+  clicked_at: string | null;
   name_zh: string | null;
   name_en: string | null;
   contact_email: string | null;
@@ -68,7 +69,8 @@ export default function AdminLinksPage() {
     loadCodes();
   }
 
-  const available = codes.filter((c) => !c.assigned_to).length;
+  const available = codes.filter((c) => !c.assigned_to && !c.clicked_at).length;
+  const clicked = codes.filter((c) => c.clicked_at && !c.assigned_to).length;
   const used = codes.filter((c) => c.assigned_to).length;
 
   return (
@@ -84,7 +86,7 @@ export default function AdminLinksPage() {
 
       <main className="p-4 max-w-lg mx-auto space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
             <p className="text-2xl font-bold text-gray-900">{codes.length}</p>
             <p className="text-xs text-gray-500 mt-1">{t("admin.total")}</p>
@@ -92,6 +94,10 @@ export default function AdminLinksPage() {
           <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
             <p className="text-2xl font-bold text-green-600">{available}</p>
             <p className="text-xs text-gray-500 mt-1">{t("admin.available")}</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
+            <p className="text-2xl font-bold text-amber-600">{clicked}</p>
+            <p className="text-xs text-gray-500 mt-1">已領取</p>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
             <p className="text-2xl font-bold text-purple-600">{used}</p>
@@ -154,6 +160,10 @@ export default function AdminLinksPage() {
                       <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
                         {t("admin.assigned")}
                       </span>
+                    ) : c.clicked_at ? (
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                        已領取
+                      </span>
                     ) : (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                         {t("admin.available")}
@@ -163,6 +173,11 @@ export default function AdminLinksPage() {
                   {c.assigned_to && (
                     <p className="text-xs text-gray-500 mt-1">
                       → {c.name_zh || c.name_en || c.contact_email || t("home.unknown")}
+                    </p>
+                  )}
+                  {c.clicked_at && !c.assigned_to && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(c.clicked_at).toLocaleString("zh-TW")}
                     </p>
                   )}
                 </div>

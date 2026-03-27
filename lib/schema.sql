@@ -28,8 +28,12 @@ CREATE TABLE IF NOT EXISTS poap_codes (
   event_name TEXT,
   assigned_to UUID REFERENCES contacts(id),
   assigned_at TIMESTAMPTZ,
+  clicked_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration: add clicked_at if not exists
+-- ALTER TABLE poap_codes ADD COLUMN IF NOT EXISTS clicked_at TIMESTAMPTZ;
 
 -- Index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_contacts_created_at ON contacts(created_at DESC);
