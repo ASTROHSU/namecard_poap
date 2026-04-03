@@ -130,13 +130,16 @@
     line-height:1.85; max-width:360px; text-align:center;
   }
 
+  .hero-badges {
+    display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:14px;
+  }
   .hero-badge {
-    display:inline-block; margin-top:14px;
-    padding:6px 16px; border-radius:20px;
+    display:inline-block;
+    padding:5px 14px; border-radius:20px;
     background:rgba(107,91,62,0.07); border:1px solid rgba(107,91,62,0.12);
-    font-size:13.5px; color:var(--accent); font-weight:500;
+    font-size:12.5px; color:var(--accent); font-weight:500;
     text-decoration:none; transition:all .2s;
-    letter-spacing:.3px;
+    letter-spacing:.3px; white-space:nowrap;
   }
   .hero-badge:hover { background:rgba(107,91,62,0.12); border-color:rgba(107,91,62,0.2); }
 
@@ -346,7 +349,10 @@
     <div class="hero-name" id="hero-name">許明恩</div>
     <div class="hero-title" id="hero-title">區塊勢創辦人</div>
     <p class="hero-bio" id="bio">Web3 電子報 ・Podcast 主持人 ・20,000+ 訂閱者</p>
-    <a class="hero-badge" href="https://www.bnext.com.tw/article/89549/blockchain2026-blocktrend-web3" target="_blank" id="hero-badge">數位時代 2025、2026 區塊鏈影響力人物</a>
+    <div class="hero-badges">
+      <a class="hero-badge" href="https://www.bnext.com.tw/article/89549/blockchain2026-blocktrend-web3" target="_blank" id="hero-badge">數位時代 2025、2026 區塊鏈影響力人物</a>
+      <a class="hero-badge" href="https://nxbn.ethereum.foundation/scholars" target="_blank" id="hero-badge2">2024 以太坊基金會 Devcon Scholar</a>
+    </div>
   </div>
 
   <!-- ====== 聯絡方式 ====== -->
@@ -474,6 +480,7 @@ const i18n = {
     heroName:'許明恩', heroTitle:'區塊勢創辦人',
     bio:'Web3 電子報 ・Podcast 主持人 ・20,000+ 訂閱者',
     heroBadge:'數位時代 2025、2026 區塊鏈影響力人物',
+    heroBadge2:'2024 以太坊基金會 Devcon Scholar',
     labelRoles:'我在做的事', labelBooks:'審訂與推薦', labelContact:'聯絡方式',
     book1Title:'Read Write Own', book1Role:'審定',
     book2Title:'以太奇襲', book2Role:'推薦序',
@@ -492,6 +499,7 @@ const i18n = {
     heroName:'Astro Hsu', heroTitle:'Founder, Blocktrend',
     bio:"Blockchain Newsletter ・Podcast Host ・20,000+ Subscribers",
     heroBadge:'BusinessNext Blockchain Influencer 2025 & 2026',
+    heroBadge2:'Ethereum Foundation Devcon Scholar 2024',
     labelRoles:'What I Do', labelBooks:'Review & Endorsement', labelContact:'Contact',
     book1Title:'Read Write Own', book1Role:'Reviewer',
     book2Title:'The Infinite Machine', book2Role:'Foreword',
@@ -516,6 +524,7 @@ function toggleLang() {
   document.getElementById('hero-title').textContent = t.heroTitle;
   document.getElementById('bio').textContent = t.bio;
   document.getElementById('hero-badge').textContent = t.heroBadge;
+  document.getElementById('hero-badge2').textContent = t.heroBadge2;
   document.getElementById('label-roles').textContent = t.labelRoles;
   document.getElementById('label-books').textContent = t.labelBooks;
   document.getElementById('label-contact').textContent = t.labelContact;
